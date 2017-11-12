@@ -1,4 +1,5 @@
 const RADIUS_DEFAULT = 36;
+const DAMPENING_EFFECT = .80;
 const colors = [
   '#FF0000',
   '#00FF00',
@@ -6,7 +7,7 @@ const colors = [
 ];
 const gravity = {
   x: 0,
-  y: 0.15
+  y: 0.25
 };
 
 function Gumball(x, y, radius, color) {
@@ -15,7 +16,6 @@ function Gumball(x, y, radius, color) {
   this.y = y || (0 - this.radius);
   this.color = color || colors[floor(random(colors.length))];
   this.velocity = createVector(0, 0);
-  console.log(this);
 
   this.show = function () {
     noStroke();
@@ -25,9 +25,23 @@ function Gumball(x, y, radius, color) {
 
   this.move = function () {
     this.x += this.velocity.x;
-    this.y += this.velocity.y;
     this.velocity.x += gravity.x;
+    this.y += this.velocity.y;
     this.velocity.y += gravity.y;
+  }
+
+  this.wallCollide = function () {
+    if (this.x - this.radius < 0 || this.x + this.radius > width) {
+      this.velocity.x = -(this.velocity.x * DAMPENING_EFFECT);
+    } else if (this.y + this.radius > height) {
+      this.velocity.y = -(this.velocity.y * DAMPENING_EFFECT);
+      if (this.y + this.radius > height) {
+        this.y = height - this.radius;
+      }
+      if (this.velocity.y > -1.6) {
+        this.velocity.y = 0;
+      }
+    }
   }
 
   this.offscreen = function () {
